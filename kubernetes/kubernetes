@@ -1,0 +1,37 @@
+Worker: 
+    a) Kubelet ==> Scheduling pods on worker on request from "Schedular"
+    b) Kube Proxy ==> Internal network
+    c) Container Runtime Interface ==> To run container we require CRI, we currenly use docker
+
+Master Node: 
+    a) Api Server ==> Enter point of request to cluster
+    b) Schedular ==> Where to schedule pod based on resources available
+    c) Controller Manager ==> Detect state changes in cluster
+    d) ectd ==> Store cluster data in Key Value format
+
+
+Kubernetes services: 
+ClusterIP, NodePort, LoadBalancer, and Ingress
+
+
+Type of object/kind in Kubernetes:
+1) Pod
+2) Deployment
+3) ReplicaSets
+4) StatefulSet
+5) DeamonSets
+6) PersistentVolume
+7) Service
+8) Namespaces
+9-10) ConfigMaps & Secrets
+11) Job
+12) Cronjob
+
+
+kubectl version 
+kubectl upgrade of server
+
+kubectl version --short
+Client Version: v1.27.4
+Kustomize Version: v5.0.1
+

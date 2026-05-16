@@ -1,0 +1,23 @@
+docker --version: Shows installed Docker version
+
+docker pull nginx: Downloads image from registry
+
+docker image ls/docker image : Displays downloaded images
+
+docker rmi nginx: Deletes image
+docker rmi -f nginx: with force
+
+docker build -t myapp . :Builds image from Dockerfile
+
+docker run -d nginx: Creates and starts container
+
+docker run -it ubuntu bash
+docker run -d --name web nginx
+docker run -d -p 80:80 nginx
+docker run -d nginx
+docker run nginx
+
+docker ps: Shows running containers
+docker ps -a: Shows all including stopped containers
+
+docker rm -f web: 

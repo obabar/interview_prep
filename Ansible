@@ -1,0 +1,41 @@
+---
+    - name: Deploy the EAM setup
+      hosts: eam_setup
+      remote_user: ubuntu
+      become: yes
+      tasks:
+        - name: run apt-get update
+          apt:
+            update-cache: yes
+          become: true
+        - name: install packages
+          apt:
+            name: 
+              - nginx
+              - sftp
+              - certbot
+              - nginx
+        - name: Configure nginx
+          service:
+            name: nginx.service
+            enabled: yes
+            state: started
+
+        - name: Check if file is present
+          shell: ls -l /etc/fail2ban/jail.d/sshd.conf | wc -l
+          register: ssh_conf_present
+        - debug: msg="{{ssh_conf_present.stdout}}"
+        - name: Copying ssh rule
+          copy: 
+            src: /var/lib/jenkins/ansible_files_to_copy/sshd.conf
+            dest: /etc/fail2ban/jail.d/sshd.conf
+            owner: root
+            group: root
+          when: ssh_conf_present.stdout == "0"
+
+        - name: Remove TLSv1 TLSv1.1 version from nginx
+          replace:
+            path: /etc/nginx/nginx.conf
+            regexp: 'TLSv1 TLSv1.1'
+            replace: ''
+            backup: yes

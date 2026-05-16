@@ -1,0 +1,26 @@
+Hi I am omkar babar,
+I have 8 years of experience.
+My current organistion is Valuefy technologies, Its a fintech orgination.
+Its  a product based company, with  presence in Indian and across globe such as Bahrain,duabi, london,SSwiss,Singapore.
+In india we deal with bank 
+And for internaltion product we deal with Financial institution managing manging money for people.
+We provide SAAS and even solution of our services.
+For SAAS we have our product deployed on AWS,Azure on EC2 and kubernetes both.
+Client can select on whether to go with ec2 based infra or kubernetes based apporcah.
+We also have our application deployed at our client end i.e on prem infra.
+Our product is developed on nodeJS and angular for frontend, we use redis for queue service and ES to store Flat file data with is generated from RDS after running query and processing the raw data to provide on GUI on our application, for RDS we use mysql
+We have nginx as our webserver for ec2, for securing the inbound and outbound traffic we use aws network firewall. and for filtering web application we use AWS WAF.
+For CICD we use jenkins and buildpiper app
+Our deployment process for first the feature repo is created from master repo by tech lead.
+From which team member take pull and start working on the tech branch and start woking on the code.
+Post his completeing he will merge the code in tech leads branch
+Tech will have permission to merge the branch to eam-sit branch. As the code is merged a jenkins webhook API is triggered to build and deploy the branch in SIT server. Post deploymnet the Apllication will be tested by dev first then by Tester.
+Post approval from tested the code will get merged into  eam-uat branch post merging againg the jenkins second pipeline will get triggered forbuilding and deployment in stagijng/uat environment. Post tester confirmation the code willnow get mergerd into master branch on merger jenkins pipeline will get triggered and only the build will happen for deployemht and email will get initiated for approval for deployment in production.
+For kuber netes w emaintain seprate repo for each service. Dev work on feature branc and puch of code a pipeline is triggere for building of application and deployment on sit environemnt.
+Also and email is triggerd for approval for deoployment on UAT envoironmant. Post TEsters approval the deployment happend on UAT and post tech lead and product owner approval deployment happen on prodicytion over single pipeleine
+
+
+
+
+
+

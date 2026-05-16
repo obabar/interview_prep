@@ -1,0 +1,11 @@
+# How to connect to ec2 via SSM 
+Jenkins Server
+      |
+      | AWS CLI + IAM Role/User
+      |
+AWS Systems Manager (SSM)
+      |
+EC2 Instance (SSM Agent)
+
+# AWS Connect:
+Amazon Connect is a cloud-based, AI-powered contact center service (SaaS) that allows businesses to set up, manage, and scale customer service operations—voice, chat, and tasks—using a web interface without needing to manage underlying infrastructure. It enables omni-channel, personalized customer experiences while offering pay-by-the-minute pricing.

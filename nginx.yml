@@ -1,0 +1,55 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: centwealthuat
+  namespace: cboi-omniwealth-uat
+  annotations:
+    route.openshift.io/termination: edge
+spec:
+  tls:
+   - hosts: 
+      - centwealthuat.apps.neomznp.cu.centralbank.co.in
+     secretName: centwealthuat
+  rules:
+    - host: centwealthuat.apps.neomznp.cu.centralbank.co.in
+      http:
+        paths:
+          - path: /api/data-maintenance/
+            pathType: Prefix
+            backend:
+              service:
+                name: ms-master-management
+                port:
+                  number: 443
+          - path: /api/execution/
+            pathType: Prefix
+            backend:
+              service:
+                name: ms-order-management
+                port:
+                  number: 443
+          - path: /api/user-management/
+            pathType: Prefix
+            backend:
+              service:
+                name: ms-user-management
+                port:
+                  number: 443
+          - path: /api/reporting-analytics/
+            pathType: Prefix
+            backend:
+              service:
+                name: ms-analytics
+                port:
+                  number: 443
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 443
+status:
+  loadBalancer:
+    ingress:
+      - hostname: router-default.apps.neomznp.cu.centralbank.co.in

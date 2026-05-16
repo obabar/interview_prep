@@ -1,0 +1,46 @@
+Pod: Run single container/application
+
+Deployment: Rolling updates
+            Scaling
+            Self-healing pods 
+
+Service: ClusterIP
+         NodePort
+         LoadBalancer
+    
+ConfigMap: Environment variables.   Configuration files
+
+Secret: Passwords   Tokens   API keys
+
+Namespace: Resource isolation
+
+
+########################################################################
+
+how to read logs on restarted pods
+
+
+# Looking at pod status which will contain the above status information:
+kubectl get pod POD_NAME -o yaml
+
+# Watch the events to specific pod:
+kubectl get events -w | grep POD_NAME_STRING
+
+# For default container logs: Tailing the logs may give clue
+kubectl logs -f POD_NAME
+
+# For specific container: reason for application failure
+kubectl logs -f POD_NAME --container CONTAINER_NAME
+
+# only view logs of a crashed/restarted: 
+kubectl logs <POD_NAME> --previous
+
+# Get logs of multiple pods with this label:
+kubectl logs -l app=blue-green  
+
+
+# Looking at events:
+kubectl describe deployment DEPLOYMENT_NAME
+kubectl describe pod POD_NAME
+
+

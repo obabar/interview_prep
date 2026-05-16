@@ -1,0 +1,42 @@
+terraform init: Run this first in every new Terraform project.
+
+terraform validate: Checks Terraform syntax.
+                    Verifies configuration is valid.
+
+terraform fmt -recursive: Automatically formats .tf files
+                          Makes code readable and standardized
+
+terraform plan: Shows what Terraform will create/update/delete
+                Does not make actual changes
+
+terraform apply: Creates or updates infrastructure
+terraform apply -auto-approve
+
+terraform destroy: Deletes all infrastructure managed by Terraform
+terraform destroy -auto-approve
+
+terraform show: Displays Terraform state details
+
+terraform state list: Shows all tracked resources
+
+terraform import <resource_type.name> <resource_id>: Brings existing cloud resources 
+                                                     under Terraform management
+terraform import aws_s3_bucket.demo my-bucket
+
+terraform workspace list: Shows available environments/workspaces
+terraform workspace new dev: Creates separate environment state
+terraform workspace select prod: Switches environment
+
+terraform init -upgrade: Updates provider plugins to latest allowed versions
+terraform providers lock: Creates dependency lock file
+
+terraform refresh: Updates Terraform state from real infrastructure
+
+| File               | Purpose                |
+| ------------------ | ---------------------- |
+| `main.tf`          | Main configuration     |
+| `variables.tf`     | Input variables        |
+| `outputs.tf`       | Output values          |
+| `terraform.tfvars` | Variable values        |
+| `providers.tf`     | Provider configuration |
+| `backend.tf`       | Remote state config    |

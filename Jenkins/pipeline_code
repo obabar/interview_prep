@@ -1,0 +1,138 @@
+pipeline {
+    agent any
+    stages {
+        stage ("Clean Workspace") {
+            steps{
+                cleanWs()
+            }
+        }
+        stage ( Repo clone) {
+            steps {
+                sh ''' git clone http:repo
+                sed -i 's/source/destination/g' filename '''
+            }
+        }
+    }
+}
+#########################################################
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  script:
+    - echo "Building the application..."
+    # Add build commands here
+
+test:
+  stage: test
+  script:
+    - echo "Testing the application..."
+    # Add test commands here
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying the application..."
+    - kubectl apply -f deployment.yml  # This is your Kubernetes deployment script
+
+
+
+#########################################################
+
+/* groovylint-disable CompileStatic, GStringExpressionWithinString, NestedBlockDepth */
+pipeline {
+    environment {
+        ip='10.0.1.113'
+        client_code='bank-muscat'
+        def build = sh(script: "echo `date +%Y-%m-%d-%H-%M-%S`", returnStdout: true).trim()
+    }
+    agent any
+    options {
+            // timeout(time: 1, unit: 'HOURS')
+            skipDefaultCheckout(true)
+    } 
+    stages {
+        stage('Cleaning Workspace') {
+            steps {
+                cleanWs()
+                sh 'rm -rf ./*'
+                echo 'Hello world!' 
+            }
+        }
+        stage('Approval for Dev Deployment') {
+            // no agent, so executors are not used up when waiting for approvals
+            agent none
+            steps {
+                script {
+                    emailext body: '''${DEFAULT_CONTENT}''',
+                    mimeType: 'text/html',
+                    subject: '''BM Dev Deployment Approve Pending''',
+                    to: 'omkarb@valuefy.com, shivama@valuefy.com',
+                    replyTo: '''${DEFAULT_REPLYTO}'''
+                    def approval = input id: 'Deploy', message: 'Deploy to Dev?', submitter: 'praveenkumard,admin,omkar,shivama'
+                }
+            }
+        }
+        stage('Deploying on Sit Server') {
+            steps {
+                echo "Hello world!"
+                sh '''ARTIFACT_LINK="https://bank-muscat-sftp.s3.ap-south-1.amazonaws.com/Artifact/bm-sit.tar.gz" && aws s3 cp "s3://bank-muscat-sftp/Artifact/bm-sit.tar.gz" .
+                tar -xzf bm-sit.tar.gz && rm -rf bm-sit.tar.gz
+                echo "Cloning vault"
+                git clone git@git.valuefy.com:eam/implementations/bankmuscat/vault-bank-muscat.git
+                cp -R vault-bank-muscat/Staging/bm_uat/* server/product/configs/ && rm -rf vault-bank-muscat
+                ssh bm_uat@${ip} "/bin/bash -i -c 'cd /home/bm_uat/app/ && ls -1t | tail -n +6 | xargs rm -rf'"
+                echo $PWD
+                rsync -Pavq "$PWD"/ bm_uat@${ip}:app/${build}
+                echo "Running migrations from primary machine"
+                ssh bm_uat@${ip} "/bin/bash -i -c 'node /home/bm_uat/app/${build}/server/bin/update-models.js'"
+                ssh bm_uat@${ip} "/bin/bash -i -c 'node /home/bm_uat/app/${build}/server/bin/update-masters.js ${client_code}'"
+                ssh bm_uat@${ip} "/bin/bash -i -c 'node /home/bm_uat/app/${build}/server/bin/update-file-containers.js'"
+                ssh bm_uat@${ip} "/bin/bash -i -c 'node /home/bm_uat/app/${build}/server/bin/update-options.js'"
+                ssh bm_uat@${ip} "/bin/bash -i -c 'node /home/bm_uat/app/${build}/server/bin/update-queues.js'"
+                ssh bm_uat@${ip} "/bin/bash -i -c 'node /home/bm_uat/app/${build}/server/bin/update-logo.js'"
+                echo "restarting pm2 on each server"
+                ssh bm_uat@${ip} "/bin/bash -i -c 'ln -sfn /home/bm_uat/app/${build} /home/bm_uat/app/current'"
+                ssh bm_uat@${ip} "/bin/bash -i -c 'pm2 reload all'"
+                echo "Deployed on SIT Server"'''
+            }
+        }
+        stage('Uploading artifact') {
+            steps {
+                sh '''ARTIFACT_LINK="https://bank-muscat-sftp.s3.ap-south-1.amazonaws.com/Artifact/bm-sit.tar.gz" && aws s3 cp "s3://bank-muscat-sftp/Artifact/bm-sit.tar.gz" .
+                tar -xzf bm-sit.tar.gz && rm -rf bm-sit.tar.gz
+                echo "Cloning vault for SIT"
+                git clone git@git.valuefy.com:eam/implementations/bankmuscat/vault-bank-muscat.git
+                cp -R vault-bank-muscat/SIT/bm_sit/* server/product/configs/ && rm -rf vault-bank-muscat
+                tar -czf bm-sit-${build}.tar.gz *
+                aws s3 cp bm-sit-${build}.tar.gz "s3://bank-muscat-sftp/Restricted/SIT/"  && ARTIFACT_LINK="https://bank-muscat-sftp.s3.ap-south-1.amazonaws.com/Restricted/SIT/bm-sit-${build}.tar.gz"
+                sha256sum  bm-sit-${build}.tar.gz  >> checksum_sit.txt
+                aws s3 cp checksum_sit.txt "s3://bank-muscat-sftp/Restricted/SIT/"  && ARTIFACT_LINK="https://bank-muscat-sftp.s3.ap-south-1.amazonaws.com/Restricted/SIT/checksum_sit.txt"
+                rm -rf bm-sit-${build}.tar.gz
+                rm -rf checksum_sit.txt
+                echo "Cloning vault for UAT"
+                git clone git@git.valuefy.com:eam/implementations/bankmuscat/vault-bank-muscat.git
+                cp -R vault-bank-muscat/UAT/bm_uat_client/* server/product/configs/ && rm -rf vault-bank-muscat
+                tar -czf bm-uat-${build}.tar.gz *
+                aws s3 cp bm-uat-${build}.tar.gz "s3://bank-muscat-sftp/Restricted/UAT/"  && ARTIFACT_LINK="https://bank-muscat-sftp.s3.ap-south-1.amazonaws.com/Restricted/UAT/bm-uat-${build}.tar.gz"
+                sha256sum  bm-uat-${build}.tar.gz  >> checksum_uat.txt
+                aws s3 cp checksum_uat.txt "s3://bank-muscat-sftp/Restricted/UAT/"  && ARTIFACT_LINK="https://bank-muscat-sftp.s3.ap-south-1.amazonaws.com/Restricted/UAT/checksum_uat.txt"
+                rm -rf bm-uat-${build}.tar.gz
+                rm -rf checksum_uat.txt
+                echo "Cloning vault for PROD"
+                git clone git@git.valuefy.com:eam/implementations/bankmuscat/vault-bank-muscat.git
+                cp -R vault-bank-muscat/PROD/bm_prod/* server/product/configs/ && rm -rf vault-bank-muscat
+                tar -czf bm-prod-${build}.tar.gz *
+                aws s3 cp bm-prod-${build}.tar.gz "s3://bank-muscat-sftp/Restricted/PROD/"  && ARTIFACT_LINK="https://bank-muscat-sftp.s3.ap-south-1.amazonaws.com/Restricted/PROD/bm-prod-${build}.tar.gz"
+                sha256sum  bm-prod-${build}.tar.gz  >> checksum_prod.txt
+                aws s3 cp checksum_prod.txt "s3://bank-muscat-sftp/Restricted/PROD/"  && ARTIFACT_LINK="https://bank-muscat-sftp.s3.ap-south-1.amazonaws.com/Restricted/PROD/checksum_prod.txt"
+                rm -rf bm-prod-${build}.tar.gz
+                rm -rf checksum_prod.txt
+                '''
+            }
+        }
+    }
+}

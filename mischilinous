@@ -1,0 +1,58 @@
+SYFT, Sonarqube, trivy
+
+pod             ==>     Deamonset   ==> Pod
+node_exporter   ==>     prometheus  ==> Grafana
+fluient-bit     ==>     ES          ==> Kibana and APM
+
+sudo lsblk
+sudo growpart /dev/nvme0n1 1
+sudo resize2fs /dev/nvme0n1p1
+
+
+
+# RBAC authn and authz : Role based access 
+Authentication: authn has to do with identity, or who someone is, 
+Authorization: while authz has to do with permissions, or what someone is allowed to do.
+
+
+In grafana: Email alerts using SMTP mechanism
+machine_cpu_core:  show CPU of base machine
+container_cpu_usage_seconds_total: show CPU of container
+
+
+############## GIT (Merge VS Rebase)
+On feture branch:
+git checkout custom_branch  && git pull origin && git merge master
+git merge master
+
+git rebase master (If only single using is working on fetaure directory) not goot for multiple user working on single fetaure repo
+
+####################
+git pull origin
+pull the repo from remote ==> local repo + working Directory
+
+git fetch 
+pull the repo from remote ==> local ==> git merge => Working directory
+need to merge to view it in working directory
+
+#################
+git commint -m "message"   ==> Snapshot is created 
+git restore --staged test.txt ===> from staged to modified state
+git restore test.txt ==> clean state, where it is equivalent to git clone
+
+git stash
+
+git stash list 
+
+git stash apply <sha>
+
+sudo gitlab-ctl status
+sudo gitlab-ctl stop
+sudo gitlab-ctl start
+
+systemctl status gitlab-runsvdir.service
+
+/opt/gitlab/
+
+GitLab: 15.2.2
+Kubectl: 1.27.4

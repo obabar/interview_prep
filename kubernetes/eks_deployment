@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-order-management-dev
+  namespace: ibl-demo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ms-order-management-dev
+  template:
+    metadata:
+      labels:
+        app: ms-order-management-dev
+    spec:
+      containers:
+      - name: ms-order-management-dev
+        image: git.valuefy.com:5050/ibl/backend/order:356
+        # resources:
+        #   requests:
+        #     memory: "4096Mi"
+        #     cpu: "1000m"
+        #   limits:
+        #     memory: "8192Mi"
+        #     cpu: "2000m"
+        envFrom:
+        - secretRef:
+            name: demosecret
+      imagePullSecrets:
+      - name: git
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-order-management-dev
+  namespace: ibl-demo
+spec:
+  selector:
+    app: ms-order-management-dev
+  ports:
+    - protocol: TCP
+      port: 3002
+      targetPort: 3002

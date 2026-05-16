@@ -1,0 +1,42 @@
+Deployment errors: These are errors that occur when a deployment is being created or updated. Examples include problems with the deployment configuration, image pull failures, and resource quota violations.
+Pod errors: These are errors that occur at the pod level, such as problems with container images, resource limits, or networking issues.
+Service errors: These are errors that occur when creating or accessing services, such as problems with service discovery or load balancing.
+Networking errors: These are errors related to the network configuration of a Kubernetes cluster, such as problems with DNS resolution or connectivity between pods.
+Resource exhaustion errors: These are errors that occur when a cluster runs out of resources, such as CPU, memory, or storage.
+Configuration errors: These are errors that occur due to incorrect or misconfigured settings in a Kubernetes cluster.
+
+ImagePullBackOff: kubectl describe pods <pod-name>
+                The image repository is not accessible or the image doesn’t exist.
+                The image requires authentication and the cluster is not configured with the necessary credentials.
+                The image is too large to be pulled over the network.
+                Network connectivity issues.
+
+CrashLoopBackOff: kubectl describe pods <pod-name> 
+                  kubectl logs <pod-name>
+                The container’s command or startup script exits with a non-zero status code, causing the container to crash.
+                The container experiences an error while running, such as a memory or file system error.
+                The container’s dependencies are not met, such as a service it needs to connect to is not running.
+                The resources allocated for the container are insufficient for the container to run.
+                Configuration issues in the pod’s yaml file
+
+Exit Code 1: kubectl logs <pod-name>
+            The command specified in the container’s CMD or ENTRYPOINT instructions returned an error code
+            The container’s process was terminated by a signal
+            The container’s process was killed by the system due to resource constraints or a crash
+            The container lacks the necessary permissions to access a resource
+
+Kubernetes Node Not Ready: kubectl describe node <node-name>
+                           kubectl top node <node-name>
+                            The node’s kubelet is not running or is not responding.
+                            The node’s network is not configured correctly or is unavailable.
+                            The node has insufficient resources to run pods, such as low memory or disk space.
+                            The node’s runtime is not healthy.
+
+CreateContainerConfigError: kubectl describe pod <pod-name>
+                            The pod is missing CONFIGMAP and SECRETS
+
+Pending: kubectl describe pod <pod-name>
+         The pod is failing to PVC
+
+FailedScheduling: 
+                  Cluster lacks resources.Add more worker nodes

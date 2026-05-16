@@ -1,0 +1,16 @@
+Linux: /var/lib/jenkins
+Windows: C:\Program Files (x86)\Jenkins or C:\Program Files\Jenkins
+Within this directory, you'll find various subdirectories where Jenkins stores its data, including:
+
+workspace: Where job workspaces are stored.
+jobs: Contains configurations for individual Jenkins jobs.
+plugins: Stores installed plugins.
+userContent: For static files that you want to serve from Jenkins.
+lib: This might be the directory where libraries are stored. However, if you're referring specifically to libraries used in Jenkins Pipelines (like shared libraries for Jenkins Pipeline), those are typically stored in a source code repository and referenced from there, rather than being stored within the Jenkins home directory itself.
+
+Enable project-based security: 
+This project is parameterised
+Build periodically
+Build after other projects are built
+
+Jenkins shared library: using grovy stages code as shared library stored into a repo and use it

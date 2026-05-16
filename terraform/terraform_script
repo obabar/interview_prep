@@ -1,0 +1,109 @@
+resource "aws_launch_template" "ec2" {
+  name = var.name
+  iam_instance_profile {
+    name = var.iam_instance_profile
+  }
+  image_id      = var.image_id
+  instance_type = var.instance_type
+  key_name      = var.key_name
+  network_interfaces {
+    associate_public_ip_address = var.associate_public_ip_address
+    security_groups             = var.ec2_security_groups
+  }
+  user_data = var.user_data
+}
+
+
+resource "aws_autoscaling_group" "bar" {
+  name                      = "foobar3-terraform-test"
+  max_size                  = 5
+  min_size                  = 2
+  health_check_grace_period = 300
+  health_check_type         = "ELB"
+  desired_capacity          = 4
+  force_delete              = true
+  placement_group           = aws_placement_group.test.id
+  launch_configuration      = aws_launch_configuration.foobar.name
+  vpc_zone_identifier       = [aws_subnet.example1.id, aws_subnet.example2.id]
+
+  instance_maintenance_policy {
+    min_healthy_percentage = 90
+    max_healthy_percentage = 120
+  }
+}
+
+resource "aws_autoscaling_group" "ec2" {
+  name              = "${aws_launch_template.ec2.name}-asg"
+  min_size          = var.min_size
+  desired_capacity  = var.desired_capacity
+  max_size          = var.max_size
+  health_check_type = var.health_check_type
+  target_group_arns = [for i in range(length(var.target_groups)) : aws_lb_target_group.tg[i].arn if aws_lb_target_group.tg != []]
+  #launch_configuration = aws_launch_configuration.ec2.name
+  launch_template {
+    id = aws_launch_template.ec2.id
+  }
+  vpc_zone_identifier = var.ec2_subnets
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tag {
+    key                 = "Name"
+    value               = var.name
+    propagate_at_launch = true
+  }
+
+}
+
+resource "aws_lb" "alb" {
+  count              = var.create_lb ? 1 : 0
+  name               = var.name
+  internal           = var.internal_lb
+  load_balancer_type = var.lb_type
+  subnets            = var.lb_subnets
+  security_groups    = var.lb_security_groups
+}
+
+resource "aws_lb_listener" "http" {
+  count             = var.create_lb ? length(var.http_listeners) : 0
+  load_balancer_arn = aws_lb.alb[0].arn
+  port              = var.http_listeners[count.index]["port"]
+  protocol          = lookup(var.http_listeners[count.index], "protocol", "HTTP")
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.tg[var.http_listeners[count.index]["target_group_index"]].id
+  }
+}
+
+resource "aws_lb_listener" "https" {
+  count             = var.create_lb ? length(var.https_listeners) : 0
+  load_balancer_arn = aws_lb.alb[0].arn
+
+  port            = var.https_listeners[count.index]["port"]
+  protocol        = lookup(var.https_listeners[count.index], "protocol", "HTTPS")
+  certificate_arn = var.https_listeners[count.index]["acm_cert_arn"]
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.tg[var.https_listeners[count.index]["target_group_index"]].id
+  }
+}
+
+resource "aws_lb_target_group" "tg" {
+  count       = var.create_lb ? length(var.target_groups) : 0
+  name        = lookup(var.target_groups[count.index], "name", null)
+  port        = lookup(var.target_groups[count.index], "backend_port", null)
+  protocol    = lookup(var.target_groups[count.index], "backend_protocol", null)
+  target_type = "instance"
+  vpc_id      = lookup(var.target_groups[count.index], "vpc_id", null)
+  health_check {
+    interval            = lookup(var.target_groups[count.index], "health_check_interval", 30)
+    path                = lookup(var.target_groups[count.index], "health_check_path", "/")
+    port                = "traffic-port"
+    protocol            = lookup(var.target_groups[count.index], "backend_protocol", "HTTP")
+    timeout             = lookup(var.target_groups[count.index], "health_check_timeout", 5)
+    healthy_threshold   = lookup(var.target_groups[count.index], "health_check_healthy_threshold", 2)
+    unhealthy_threshold = lookup(var.target_groups[count.index], "health_check_unhealthy_threshold", 2)
+  }
+}

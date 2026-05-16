@@ -1,0 +1,47 @@
+From node-12.13.0-alpine As base
+ARG node_env production
+ARG RDS_Host
+ARG RDS_USER
+ARG RDS_PASS
+
+RUN mkdir /app && \
+    apk update 
+
+COPY . /app
+WORKDIR /app
+
+RUN npm run install && \
+    npm run ghostscript
+
+COPY --from=base /app /app
+
+WORKDIR /app
+
+CMD ./start.sh
+
+
+docker build \
+  --build-arg node_env=production \
+  --build-arg RDS_Host=your_rds_host \
+  --build-arg RDS_USER=your_rds_user \
+  --build-arg RDS_PASS=your_rds_password \
+  -t your_image_name:tag \
+  .
+
+
+  $ docker run -d -p 81:80 --name httpd-container httpd
+
+  $ curl http://localhost:81
+  <html><body><h1>It works!</h1></body></html>
+  
+  
+  Devops,
+  Docker ==> Done
+  Kubernates, 
+  Terraform, IAC, 
+  Jenkins, 
+  Ansible 
+  any scripting experience 
+  
+  
+  Kubernetes Architecture: Done
