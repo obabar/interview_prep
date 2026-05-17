@@ -1,0 +1,47 @@
+User Browser
+    ↓
+DNS (Route53)
+    ↓
+Public ALB/NLB
+    ↓
+Istio Ingress Gateway
+    ↓
+VirtualService Routing
+    ↓
+Kubernetes Service
+    ↓
+Pod Envoy Sidecar
+    ↓
+Application Container
+
+# ################################################################################################################################
+
+User opens:
+https://shop.example.com
+
+↓
+Route53 resolves DNS
+
+↓
+AWS ALB receives HTTPS traffic
+
+↓
+ALB forwards to Istio Ingress Gateway
+
+↓
+Istio checks VirtualService
+
+↓
+Routes to frontend service
+
+↓
+Frontend Pod receives request
+
+↓
+Frontend calls payment-service internally
+
+↓
+Istio sidecars secure communication using mTLS
+
+↓
+Response returned to user
